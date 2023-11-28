@@ -4,8 +4,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class ClinicPlacer {
-    private final Map<Integer, HashSet<Integer>> city;
+    private final Map<Integer, Set<Integer>> city;
     private final Set<Integer> clinicLocations;
+
+	// TODO: REMOVE THIS
+	public ClinicPlacer(Map<Integer, Set<Integer>> city, Set<Integer> clinicLocations) {
+        this.city = city;
+        this.clinicLocations = clinicLocations;
+    }
 
     public ClinicPlacer() {
         this.city = new HashMap<>();
@@ -16,7 +22,7 @@ public class ClinicPlacer {
         return clinicLocations;
     }
 
-    public Map<Integer, HashSet<Integer>> getCity(){
+    public Map<Integer, Set<Integer>> getCity(){
         return city;
     }
 
