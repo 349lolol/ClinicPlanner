@@ -11,8 +11,12 @@ public class ClinicPlacer {
         this.city = new HashMap<>();
         this.clinicLocations = new HashSet<>();
     }
+
+	public void run() {
+
+	}
     
-    public Set<Integer> computeCoveredNeighbours() {
+    public Set<Integer> computeCoveredLocations() {
         Set<Integer> coveredLocations = new HashSet<>();
         
         for (int location : this.clinicLocations) {
@@ -23,10 +27,10 @@ public class ClinicPlacer {
         return coveredLocations;
     }
 
-    public Set<Integer> computeUncoveredNeighbours(){
+    public Set<Integer> computeUncoveredLocations(){
         Set<Integer> uncoveredNeighbors = this.city.keySet();
 
-        uncoveredNeighbors.removeAll(this.computeCoveredNeighbours());
+        uncoveredNeighbors.removeAll(this.computeCoveredLocations());
 
         return uncoveredNeighbors;
     }
@@ -35,11 +39,20 @@ public class ClinicPlacer {
         Map<Integer, Integer> weights = new HashMap<>();
 
         for (int node : this.city.keySet()) {
-            Set<Integer> neighbourCopy = (Set<Integer>) this.city.get(node).clone();
-            neighbourCopy.
-            weights.put(node, )
+            Set<Integer> neighbors = this.city.get(node);
+
+			int count = 0;
+
+			for (int neighbor : neighbors) {
+				if (uncoveredNeighbors.contains(neighbor)) {
+					count++;
+				}
+			}
+
+			weights.put(node, count);
         }
         
+		return weights;
     }
 
     //adds one connection
