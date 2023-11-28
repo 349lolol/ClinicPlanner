@@ -55,6 +55,29 @@ public class ClinicPlacer {
 		return weights;
     }
 
+    public int findPriorityNode(Set<Integer> uncoveredNeighbors){
+        int maxNode = -1;
+        int nodeWeight = -1;
+
+        for (int node : this.city.keySet()) {
+            Set<Integer> neighbors = this.city.get(node);
+
+			int count = 0;
+
+			for (int neighbor : neighbors) {
+				if (uncoveredNeighbors.contains(neighbor)) {
+					count++;
+				}
+			}
+
+			if(count > nodeWeight){
+                maxNode = node;
+            }
+        }
+        
+		return maxNode;
+    }
+
     //adds one connection
     public void createConnection(int node1, int node2) {
         if ((this.city.containsKey(node1)) && (this.city.containsKey(node2))) {
