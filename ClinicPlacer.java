@@ -12,6 +12,10 @@ public class ClinicPlacer {
         this.clinicLocations = new HashSet<>();
     }
 
+    public int findClinicCount(){
+        return clinicLocations.size();
+    }
+
 	public void run() {
         Set<Integer> uncoveredNeighbors = computeUncoveredLocations();
         while (uncoveredNeighbors.size() > 0) {
