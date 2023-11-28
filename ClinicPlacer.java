@@ -12,8 +12,12 @@ public class ClinicPlacer {
         this.clinicLocations = new HashSet<>();
     }
 
-    public int findClinicCount(){
-        return clinicLocations.size();
+    public Set<Integer> getClinicLocations(){
+        return clinicLocations;
+    }
+
+    public Map<Integer, HashSet<Integer>> getCity(){
+        return city;
     }
 
 	public void run() {
