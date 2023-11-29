@@ -116,6 +116,17 @@ public class ClinicPlacer {
         }
     }
 
+	public void deleteNode(int node) {
+        Set<Integer> neighbors = this.city.get(node);
+
+		// Remove neighbor connections
+		for (int neighbor : neighbors) {
+			this.city.get(neighbor).remove(node);
+		}
+
+		this.city.remove(node);
+    }
+
     //removes one connection from neighbor list
     public void deleteConnection(int node1, int node2) {
         if ((this.city.containsKey(node1)) && (this.city.containsKey(node2))) {

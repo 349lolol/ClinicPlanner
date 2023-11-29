@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class ClinicVisualizer {
 
 				this.put(6, new HashSet<Integer>());
 
-				for (int i = 7; i < 100; i++) {
+				for (int i = 7; i < 10; i++) {
 					this.put(i, new HashSet<Integer>());
 				}
 			}
@@ -80,7 +81,11 @@ public class ClinicVisualizer {
 	public ClinicVisualizer(ClinicPlacer clinicPlacer) {
 		this.frame = new JFrame("Clinic Placement Visualizer");
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		
+		// Set the size of the "inner frame" to the specified size
+		this.frame.getContentPane().setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+		this.frame.pack();
+
 		this.frame.setLayout(new BorderLayout());
 
 		this.frame.add(new VisualizerPanel(clinicPlacer), BorderLayout.CENTER);

@@ -5,6 +5,11 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +20,19 @@ public class VisualizerPanel extends JPanel {
 	private static final int PADDING = 20;
 	private static final int CLINIC_RADIUS = 15;
 
+	private static final Color EDGE_COLOR = new Color(0, 0, 255, 50);
+	private static final Color SELECTED_EDGE_COLOR = new Color(189, 0, 255, 50);
+	
+	private static final int BUTTON_WIDTH = 100;
+	private static final int BUTTON_HEIGHT = 40;
+
 	private final ClinicPlacer clinicPlacer;
 	private final Map<Integer, Point> locations;
-	private int currentNode;
+	private int selectedNode;
+
+	private final Button addNodeButton;
+	private final Button deleteNodeButton;
+	private final Button deleteEdgeButton;
 
 	public VisualizerPanel(ClinicPlacer clinicPlacer) {
 		super();
@@ -26,9 +41,43 @@ public class VisualizerPanel extends JPanel {
 		this.locations = new HashMap<>();
 
 		// -1 for not selected
-		this.currentNode = -1;
+		this.selectedNode = -1;
 
 		this.placeNodes();
+
+		// Add UI elements
+		this.addNodeButton = new Button(
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - BUTTON_HEIGHT - PADDING,
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Add Node"
+		);
+
+		this.deleteNodeButton = new Button(
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Delete Node"
+		);
+
+		this.deleteEdgeButton = new Button(
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Delete Connection"
+		);
+
+
+		this.addMouseListener(new PanelMouseListener());
 	}
 
 	public void placeNodes() {
@@ -75,6 +124,7 @@ public class VisualizerPanel extends JPanel {
 
 		this.drawEdges(g);
 		this.drawNodes(g);
+		this.drawOverlay(g);
 	}
 
 	private void drawNodes(Graphics g) {
@@ -105,37 +155,139 @@ public class VisualizerPanel extends JPanel {
 			g.setColor(Color.LIGHT_GRAY);
 			g.fillOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
 			
-			if (currentNode == entry.getKey()) {
+			g.setColor(Color.BLACK);
+
+			if (selectedNode == nodeNumber) {
+				
 				((Graphics2D) g).setStroke(new BasicStroke(4));
+				
+				g.drawOval(x - CLINIC_RADIUS - 1, y - CLINIC_RADIUS - 1, CLINIC_RADIUS * 2 + 2, CLINIC_RADIUS * 2 + 2);
+				
+				((Graphics2D) g).setStroke(new BasicStroke(2));
+			} else {
+				g.drawOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
 			}
 
-			g.setColor(Color.BLACK);
-			g.drawOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
 
 			g.drawString(nodeString, fontCornerX, fontCornerY);
 		}
 	}
 	
 	private void drawEdges(Graphics g) {
-			Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
+		Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
 
-			g.setColor(new Color(0, 0, 255, 50));
-			((Graphics2D) g).setStroke(new BasicStroke(5));
+		g.setColor(EDGE_COLOR);
+		((Graphics2D) g).setStroke(new BasicStroke(5));
 
-			for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
-				int currentNode = entry.getKey();
-				Point currentPoint = this.locations.get(currentNode);
+		for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
+			int currentNode = entry.getKey();
+			Point currentPoint = this.locations.get(currentNode);
 
-				for (int neighborNode : entry.getValue()) {
-					Point neighborPoint = this.locations.get(neighborNode);
+			for (int neighborNode : entry.getValue()) {
+				Point neighborPoint = this.locations.get(neighborNode);
 
-					g.drawLine(
-						(int) currentPoint.getX(),
-						(int) currentPoint.getY(),
-						(int) neighborPoint.getX(),
-						(int) neighborPoint.getY()
-					);
+				boolean selectedEdge = (neighborNode == selectedNode) || (currentNode == selectedNode);
+
+				if (selectedEdge) {
+					g.setColor(SELECTED_EDGE_COLOR);
+				}
+
+				g.drawLine(
+					(int) currentPoint.getX(),
+					(int) currentPoint.getY(),
+					(int) neighborPoint.getX(),
+					(int) neighborPoint.getY()
+				);
+
+				
+				if (selectedEdge) {
+					g.setColor(EDGE_COLOR);
 				}
 			}
 		}
+	}
+
+	private void drawOverlay(Graphics g) {
+		this.addNodeButton.draw(g);
+
+		if (selectedNode != -1) {
+			this.deleteNodeButton.draw(g);
+		}
+	}
+
+	private class PanelMouseListener implements MouseListener {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			Point clickedPoint = e.getPoint();
+
+			// Selecting entities
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
+					int currentNode = entry.getKey();
+					Point currentPoint = entry.getValue();
+
+					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
+						selectedNode = currentNode;
+
+						repaint();
+						return;
+					}
+				}
+			}
+
+			// Buttons
+			if (addNodeButton.getBounds().contains(clickedPoint)) {
+				addNodeButton.setPressed(true);
+				repaint();
+				return;
+			}
+
+			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
+				deleteNodeButton.setPressed(true);
+
+				clinicPlacer.deleteNode(selectedNode);
+				locations.remove(selectedNode);
+				selectedNode = -1;
+
+				repaint();
+				return;
+			}
+
+			selectedNode = -1;
+			repaint();
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			Point clickedPoint = e.getPoint();
+			
+			if (addNodeButton.getBounds().contains(clickedPoint)) {
+				addNodeButton.setPressed(false);
+				repaint();
+				return;
+			}
+
+			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
+				deleteNodeButton.setPressed(true);
+				repaint();
+				return;
+			}
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			
+		}
+		
+	}
 }
