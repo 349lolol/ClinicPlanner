@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
+
 public class ClinicVisualizer {
 
 	public static void main(String[] args) {
@@ -78,6 +79,7 @@ public class ClinicVisualizer {
 
 	public ClinicVisualizer(ClinicPlacer clinicPlacer) {
 		this.frame = new JFrame("Clinic Placement Visualizer");
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		this.frame.setLayout(new BorderLayout());
 
