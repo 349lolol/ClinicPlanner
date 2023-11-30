@@ -8,13 +8,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.List;
-import java.util.ArrayList;
+import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class VisualizerPanel extends JPanel {
 	private static final int PADDING = 20;
@@ -22,12 +23,19 @@ public class VisualizerPanel extends JPanel {
 
 	private static final Color EDGE_COLOR = new Color(0, 0, 255, 50);
 	private static final Color SELECTED_EDGE_COLOR = new Color(189, 0, 255, 50);
-	
+
 	private static final int BUTTON_WIDTH = 100;
 	private static final int BUTTON_HEIGHT = 40;
 
+	private static final int BORDER_OFFSET = PADDING + CLINIC_RADIUS;
+
+	private static final int CONTENT_WIDTH = ClinicVisualizer.SCREEN_WIDTH - (2 * BORDER_OFFSET);
+	private static final int CONTENT_HEIGHT = ClinicVisualizer.SCREEN_HEIGHT - (2 * BORDER_OFFSET);
+
 	private final ClinicPlacer clinicPlacer;
 	private final Map<Integer, Point> locations;
+	private Point currentDragPoint;
+	private int anchorNode;
 	private int selectedNode;
 
 	private final Button addNodeButton;
@@ -42,80 +50,74 @@ public class VisualizerPanel extends JPanel {
 
 		// -1 for not selected
 		this.selectedNode = -1;
+		this.anchorNode = -1;
 
 		this.placeNodes();
 
 		// Add UI elements
 		this.addNodeButton = new Button(
-			new Rectangle(
-				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-				ClinicVisualizer.SCREEN_HEIGHT - BUTTON_HEIGHT - PADDING,
-				BUTTON_WIDTH,
-				BUTTON_HEIGHT
-			),
-			"Add Node"
-		);
+				new Rectangle(
+						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+						ClinicVisualizer.SCREEN_HEIGHT - BUTTON_HEIGHT - PADDING,
+						BUTTON_WIDTH,
+						BUTTON_HEIGHT),
+				"Add Node");
 
 		this.deleteNodeButton = new Button(
-			new Rectangle(
-				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-				ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
-				BUTTON_WIDTH,
-				BUTTON_HEIGHT
-			),
-			"Delete Node"
-		);
+				new Rectangle(
+						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+						ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
+						BUTTON_WIDTH,
+						BUTTON_HEIGHT),
+				"Delete Node");
 
 		this.deleteEdgeButton = new Button(
-			new Rectangle(
-				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-				ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
-				BUTTON_WIDTH,
-				BUTTON_HEIGHT
-			),
-			"Delete Connection"
-		);
-
+				new Rectangle(
+						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+						ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
+						BUTTON_WIDTH,
+						BUTTON_HEIGHT),
+				"Delete Connection");
 
 		this.addMouseListener(new PanelMouseListener());
+		this.addMouseMotionListener(new PanelMouseMotionListener());
 	}
 
 	public void placeNodes() {
 		Set<Integer> locationSet = clinicPlacer.getCity().keySet();
 
-		int offset = PADDING + CLINIC_RADIUS;
-
-		int contentWidth = ClinicVisualizer.SCREEN_WIDTH - (2 * offset);
-		int contentHeight = ClinicVisualizer.SCREEN_HEIGHT - (2 * offset) - 40;
-
 		for (int node : locationSet) {
-			boolean isValid = false;
-			int x = 0;
-			int y = 0;
+			this.locations.put(node, this.generatePoint());
+		}
+	}
 
-			// Generate coordinates
-			while (!isValid) {
-				x = (int) (Math.random() * contentWidth) + offset;
-				y = (int) (Math.random() * contentHeight) + offset;
+	public Point generatePoint() {
+		boolean isValid = false;
+		int x = 0;
+		int y = 0;
 
-				boolean invalidPair = false;
+		// Generate coordinates
+		while (!isValid) {
+			x = (int) (Math.random() * CONTENT_WIDTH) + BORDER_OFFSET;
+			y = (int) (Math.random() * CONTENT_HEIGHT) + BORDER_OFFSET;
 
-				for (Map.Entry<Integer, Point> location : this.locations.entrySet()) {
-					Point neighborPoint = location.getValue();
+			boolean invalidPair = false;
 
-					if (Util.distance(x, y, neighborPoint.getX(), neighborPoint.getY()) < 2 * CLINIC_RADIUS) {
-						invalidPair = true;
-						break;
-					}
-				}
+			for (Map.Entry<Integer, Point> location : this.locations.entrySet()) {
+				Point neighborPoint = location.getValue();
 
-				if (!invalidPair) {
-					isValid = true;
+				if (Util.distance(x, y, neighborPoint.getX(), neighborPoint.getY()) < 2 * CLINIC_RADIUS) {
+					invalidPair = true;
+					break;
 				}
 			}
 
-			this.locations.put(node, new Point(x, y));
+			if (!invalidPair) {
+				isValid = true;
+			}
 		}
+
+		return new Point(x, y);
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class VisualizerPanel extends JPanel {
 
 		// Get the FontMetrics
 		FontMetrics metrics = g.getFontMetrics(font);
-		
+
 		for (Map.Entry<Integer, Point> entry : this.locations.entrySet()) {
 			int nodeNumber = entry.getKey();
 			String nodeString = Integer.toString(nodeNumber);
@@ -149,30 +151,29 @@ public class VisualizerPanel extends JPanel {
 
 			// Determine the X coordinate for the text
 			int fontCornerX = topCornerX + (CLINIC_RADIUS * 2 - metrics.stringWidth(nodeString)) / 2;
-			
+
 			int fontCornerY = topCornerY + ((CLINIC_RADIUS * 2 - metrics.getHeight()) / 2) + metrics.getAscent();
-			
+
 			g.setColor(Color.LIGHT_GRAY);
 			g.fillOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
-			
+
 			g.setColor(Color.BLACK);
 
 			if (selectedNode == nodeNumber) {
-				
+
 				((Graphics2D) g).setStroke(new BasicStroke(4));
-				
+
 				g.drawOval(x - CLINIC_RADIUS - 1, y - CLINIC_RADIUS - 1, CLINIC_RADIUS * 2 + 2, CLINIC_RADIUS * 2 + 2);
-				
+
 				((Graphics2D) g).setStroke(new BasicStroke(2));
 			} else {
 				g.drawOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
 			}
 
-
 			g.drawString(nodeString, fontCornerX, fontCornerY);
 		}
 	}
-	
+
 	private void drawEdges(Graphics g) {
 		Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
 
@@ -199,11 +200,25 @@ public class VisualizerPanel extends JPanel {
 					(int) neighborPoint.getY()
 				);
 
-				
 				if (selectedEdge) {
 					g.setColor(EDGE_COLOR);
 				}
 			}
+		}
+
+		if ((anchorNode != -1) && (currentDragPoint != null)) {
+			g.setColor(SELECTED_EDGE_COLOR);
+
+			Point anchorPoint = this.locations.get(anchorNode);
+
+			g.drawLine(
+				(int) anchorPoint.getX(),
+				(int) anchorPoint.getY(),
+				(int) currentDragPoint.getX(),
+				(int) currentDragPoint.getY()
+			);
+
+			g.setColor(EDGE_COLOR);
 		}
 	}
 
@@ -225,8 +240,49 @@ public class VisualizerPanel extends JPanel {
 		public void mousePressed(MouseEvent e) {
 			Point clickedPoint = e.getPoint();
 
+			// Buttons
+			if (addNodeButton.getBounds().contains(clickedPoint)) {
+				addNodeButton.setPressed(true);
+				repaint();
+
+				int value;
+
+				try {
+					value = Integer.parseInt(JOptionPane.showInputDialog("Input city number: "));
+				} catch (NumberFormatException exception) {
+					JOptionPane.showMessageDialog(null, "Not a positive integer.");
+					return;
+				}
+
+				if (clinicPlacer.getCity().containsKey(value)) {
+					JOptionPane.showMessageDialog(null, "City already exists");
+					return;
+				}
+
+				clinicPlacer.addClinic(value);
+				locations.put(value, generatePoint());
+
+				repaint();
+				addNodeButton.setPressed(false);
+
+				return;
+			}
+
+			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
+				deleteNodeButton.setPressed(true);
+				repaint();
+				
+				clinicPlacer.deleteNode(selectedNode);
+				locations.remove(selectedNode);
+				selectedNode = -1;
+				
+				deleteNodeButton.setPressed(false);
+				repaint();
+				return;
+			}
+
 			// Selecting entities
-			if (e.getButton() == MouseEvent.BUTTON1) {
+			if (SwingUtilities.isLeftMouseButton(e)) {
 				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
 					int currentNode = entry.getKey();
 					Point currentPoint = entry.getValue();
@@ -240,24 +296,6 @@ public class VisualizerPanel extends JPanel {
 				}
 			}
 
-			// Buttons
-			if (addNodeButton.getBounds().contains(clickedPoint)) {
-				addNodeButton.setPressed(true);
-				repaint();
-				return;
-			}
-
-			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
-				deleteNodeButton.setPressed(true);
-
-				clinicPlacer.deleteNode(selectedNode);
-				locations.remove(selectedNode);
-				selectedNode = -1;
-
-				repaint();
-				return;
-			}
-
 			selectedNode = -1;
 			repaint();
 		}
@@ -265,29 +303,87 @@ public class VisualizerPanel extends JPanel {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			Point clickedPoint = e.getPoint();
-			
-			if (addNodeButton.getBounds().contains(clickedPoint)) {
-				addNodeButton.setPressed(false);
-				repaint();
-				return;
-			}
 
-			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
-				deleteNodeButton.setPressed(true);
-				repaint();
-				return;
+			if (anchorNode != -1) {
+				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
+					int currentNode = entry.getKey();
+					Point currentPoint = entry.getValue();
+
+					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
+						clinicPlacer.createConnection(anchorNode, currentNode);
+						repaint();
+						break;
+					}
+				}
+
+				anchorNode = -1;
+
 			}
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			
+
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
-			
+
 		}
-		
+
+	}
+
+	private class PanelMouseMotionListener implements MouseMotionListener {
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			Point clickedPoint = e.getPoint();
+
+			// Dragging entities
+			if (SwingUtilities.isLeftMouseButton(e)) {
+				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
+					int currentNode = entry.getKey();
+					Point currentPoint = entry.getValue();
+
+					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
+						selectedNode = currentNode;
+
+						repaint();
+						return;
+					}
+				}
+
+				if (selectedNode != -1) {
+					locations.put(selectedNode, clickedPoint);
+				}
+			}
+
+			
+			// Creating Connections
+			if (SwingUtilities.isRightMouseButton(e)) {
+				currentDragPoint = e.getPoint();
+
+				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
+					int currentNode = entry.getKey();
+					Point currentPoint = entry.getValue();
+
+					if ((Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) && (anchorNode == -1)) {
+						anchorNode = currentNode;
+
+						repaint();
+						return;
+					}
+				}
+			
+			}
+
+			repaint();
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+
+		}
+
 	}
 }
