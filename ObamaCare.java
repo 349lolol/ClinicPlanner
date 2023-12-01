@@ -60,15 +60,30 @@ public class ObamaCare {
     public Map<Integer, Integer> locateNeighbors(Point currentPosition, int searchRadius, Set<Integer> connections, Map<Integer, Point> placedNeighbors) {
         for(int id : connections){
             Point target = placedNeighbors.get(id);
+            double polarAngle = 0;
+            double polarDistance = 0;
+            polarDistance = Math.hypot((target.getX() - currentPosition.getX()),(target.getY() - currentPosition.getY()));
             if((Math.abs(target.getX() - currentPosition.getX()) <= searchRadius) && (Math.abs(target.getY() - currentPosition.getY()) <= searchRadius)){
                 //target is within search box, mark down polar coordinate
-                if(target.getX() - currentPosition.getX() == 0){ //quadrantal angle/
+                if(target.getX() - currentPosition.getX() == 0){ //quadrantal angle
+                    if((target.getY() - currentPosition.getY()) >= 0){
+                        polarAngle = Math.PI/2.0;
+                    }
+                    else {
+                        polarAngle = Math.PI * 3.0 / 2.0;
+                    }
+                } 
+                else {
+                    Math.tan((target.getY() - currentPosition.getY())/(target.getX() - currentPosition.getX()));
 
+                    if((target.getY() - currentPosition.getY()) <= 0){
+                        polarAngle = Math.PI + polarAngle;
+                    }
                 }
-                Math.tan((target.getY() - currentPosition.getY())/(target.getX() - currentPosition.getX()));
-                
             }
         }
         return null;
     }
+
+    
 }

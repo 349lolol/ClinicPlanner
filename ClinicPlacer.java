@@ -57,8 +57,8 @@ public class ClinicPlacer {
 
         return uncoveredNeighbors;
     }
-
-    public Map<Integer, Integer> computeWeights(Set<Integer> uncoveredNeighbors) {
+    
+    public Map<Integer, Integer> computeWeights(Set<Integer> uncoveredNeighbors) { //old version
         Map<Integer, Integer> weights = new HashMap<>();
 
         for (int node : this.city.keySet()) {
