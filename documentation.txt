@@ -1,13 +1,17 @@
+Data Structure:
 Idea 1: Create a node data structure 
 Initially worked, but grew out of control and was not practical
 Also, can only see one node at a time which makes it hard to see the whole graph
 
-Idea 2: Electric Boogaloo
-
-Idea 3: Adjacency list
+Idea 2: Adjacency list
 Hashmap of locations to a hashset of neighbours
 
+Building on idea 2:
+For visualizer, we created another set of Point objects attached to each neighborhood, displaying the status of every neighborhood
 
+
+
+Solving Algorithm:
 Solution 1: Pure brute force O(2^N) 
 bitmask through every single combination, literal worst case brute force
 Average solution: 2^(N-1)
@@ -16,7 +20,23 @@ Solution 2: "optimized" brute force O(2^N)
 bitmask thorugh every single combination, but this start by testing all combinations of 1, 2, 3
 Average solution: Dependent on how connected city is, but should be around O(N * 2^(m+1)), where m is number of clinics required
 
-Solution 3 : Greedy algorithm O(N^2)
+Solution 3: Greedy algorithm O(N^2)
 Calculate the weight: The number of uncovered neighbours for each node
 Store the most weighted node
 mark weighted node as a new clinic, recompute until all nodes are covered
+
+Solution 4: Dynamic Programming/Recursion
+Greedy algorithm only has the locally optimal solution, so we tried using DP/Recursion to fully solve the problem
+However, it would have similar time complexity as brute force, so we decided it would not be worth using
+
+Placement Algorithm for visualizer
+Solution 1: Pure random coordinates
+from a range of valid coordinates, pick random ones for each node
+Random coordinates make more sense over a grid, as grids are likely to cuase horizontal/vertical conflict with paths
+
+Solution 2: Placement system based on density
+When a connection to a new neighborhood is found, we use the other side of the node to plan out location
+Look around the existing neighborhood, so the node is more likely to be placed away from other nodes
+While this system is effective, the time complexity and resources required was unreasonable
+Also, by adding movement functionality to each node through visualizer, there isn't much of a need for such a complex algorithm
+
