@@ -8,4 +8,8 @@ public final class Util {
 	public static double distance(Point p1, Point p2) {
 		return distance(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 	}
+
+	public static double distanceToLine(Point linePoint1, Point linePoint2, int lineThickness, Point p) {
+		return 0; // TODO: implement this
+	}
 }

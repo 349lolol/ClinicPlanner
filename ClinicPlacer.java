@@ -136,4 +136,12 @@ public class ClinicPlacer {
             System.out.println("Uh oh - deleteConnection"); //TODO: remove it
         }
     }
+
+	public void addCity(int node) {
+		if (this.city.containsKey(node)) {
+			throw new IllegalArgumentException("City already exists");
+		}
+
+		this.city.put(node, new HashSet<>());
+	}
 }

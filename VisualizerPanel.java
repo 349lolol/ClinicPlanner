@@ -259,7 +259,7 @@ public class VisualizerPanel extends JPanel {
 					return;
 				}
 
-				clinicPlacer.addClinic(value);
+				clinicPlacer.addCity(value);
 				locations.put(value, generatePoint());
 
 				repaint();
@@ -311,13 +311,12 @@ public class VisualizerPanel extends JPanel {
 
 					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
 						clinicPlacer.createConnection(anchorNode, currentNode);
-						repaint();
 						break;
 					}
 				}
 
 				anchorNode = -1;
-
+				repaint();
 			}
 		}
 
