@@ -62,7 +62,10 @@ public class ObamaCare {
             Point target = placedNeighbors.get(id);
             if((Math.abs(target.getX() - currentPosition.getX()) <= searchRadius) && (Math.abs(target.getY() - currentPosition.getY()) <= searchRadius)){
                 //target is within search box, mark down polar coordinate
-                Math.atan(target.getY() - currentPosition.getY(), target.getX() - currentPosition.getX());
+                if(target.getX() - currentPosition.getX() == 0){ //quadrantal angle/
+
+                }
+                Math.tan((target.getY() - currentPosition.getY())/(target.getX() - currentPosition.getX()));
                 
             }
         }
