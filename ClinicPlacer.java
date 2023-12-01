@@ -27,12 +27,21 @@ public class ClinicPlacer {
     }
 
 	public void run() {
+		// Every lone node becomes a clin
+        for (Map.Entry<Integer, Set<Integer>> entry : this.city.entrySet()) {
+            if (entry.getValue().size() == 0) {
+				this.clinicLocations.add(entry.getKey());
+			}
+        }
+
         Set<Integer> uncoveredNeighbors = computeUncoveredLocations();
+
         while (uncoveredNeighbors.size() > 0) {
             int newClinicId = findPriorityNode(uncoveredNeighbors);
 
             if (!addClinic(newClinicId)) {
-                System.out.println("already have clinic in system");
+				System.out.println(uncoveredNeighbors);
+                System.out.println("already have clinic " + newClinicId + " in system");
             }
 
             uncoveredNeighbors = computeUncoveredLocations();
@@ -43,6 +52,7 @@ public class ClinicPlacer {
         Set<Integer> coveredLocations = new HashSet<>();
         
         for (int location : this.clinicLocations) {
+			
             coveredLocations.add(location);
             coveredLocations.addAll(city.get(location));
         }
@@ -52,10 +62,11 @@ public class ClinicPlacer {
 
     public Set<Integer> computeUncoveredLocations(){
         Set<Integer> uncoveredNeighbors = this.city.keySet();
+		Set<Integer> uncoveredNeighborsCopy = new HashSet<>(uncoveredNeighbors);
 
-        uncoveredNeighbors.removeAll(this.computeCoveredLocations());
+        uncoveredNeighborsCopy.removeAll(this.computeCoveredLocations());
 
-        return uncoveredNeighbors;
+        return uncoveredNeighborsCopy;
     }
     
     public Map<Integer, Integer> computeWeights(Set<Integer> uncoveredNeighbors) { //old version
@@ -89,15 +100,18 @@ public class ClinicPlacer {
 
 			for (int neighbor : neighbors) {
 				if (uncoveredNeighbors.contains(neighbor)) {
+					System.out.println("Count: " + neighbor);
 					count++;
 				}
 			}
-
-			if(count > nodeWeight){
-                maxNode = node;
+			
+			if (count > nodeWeight){
+				nodeWeight = count;
+				maxNode = node;
             }
         }
-        
+    
+
 		return maxNode;
     }
 

@@ -21,11 +21,20 @@ public class VisualizerPanel extends JPanel {
 	private static final int PADDING = 20;
 	private static final int CLINIC_RADIUS = 15;
 
+	private static final Color CITY_COLOR = Color.LIGHT_GRAY;
+	private static final Color CLINIC_COLOR = Color.GREEN;
+	private static final Color COVERED_COLOR = new Color(
+			CLINIC_COLOR.getRed(),
+			CLINIC_COLOR.getGreen(),
+			CLINIC_COLOR.getBlue(),
+			64
+	);
+
 	private static final Color EDGE_COLOR = new Color(0, 0, 255, 50);
 	private static final Color SELECTED_EDGE_COLOR = new Color(189, 0, 255, 50);
 	private static final int EDGE_THICKNESS = 5;
 
-	private static final int BUTTON_WIDTH = 100;
+	private static final int BUTTON_WIDTH = 120;
 	private static final int BUTTON_HEIGHT = 40;
 
 	private static final int BORDER_OFFSET = PADDING + CLINIC_RADIUS;
@@ -41,6 +50,7 @@ public class VisualizerPanel extends JPanel {
 	private int selectedEdge1;
 	private int selectedEdge2;
 
+	private final Button recomputeButton;
 	private final Button addNodeButton;
 	private final Button deleteNodeButton;
 	private final Button deleteEdgeButton;
@@ -53,36 +63,52 @@ public class VisualizerPanel extends JPanel {
 
 		// -1 for not selected
 		this.selectedNode = -1;
-		this.anchorNode = -1; 
-		this.selectedEdge1 = -1; 
-		this.selectedEdge2 = -1; 
+		this.anchorNode = -1;
+		this.selectedEdge1 = -1;
+		this.selectedEdge2 = -1;
 
 		this.placeNodes();
 
 		// Add UI elements
+		this.recomputeButton = new Button(
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - BUTTON_HEIGHT - PADDING,
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Re-place Clinics"
+		);
+
 		this.addNodeButton = new Button(
-				new Rectangle(
-						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-						ClinicVisualizer.SCREEN_HEIGHT - BUTTON_HEIGHT - PADDING,
-						BUTTON_WIDTH,
-						BUTTON_HEIGHT),
-				"Add Node");
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Add Node"
+		);
 
 		this.deleteNodeButton = new Button(
-				new Rectangle(
-						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-						ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
-						BUTTON_WIDTH,
-						BUTTON_HEIGHT),
-				"Delete Node");
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - (3 * BUTTON_HEIGHT) - (int) (2 * PADDING),
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Delete Node"
+		);
 
 		this.deleteEdgeButton = new Button(
-				new Rectangle(
-						ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
-						ClinicVisualizer.SCREEN_HEIGHT - (2 * BUTTON_HEIGHT) - (int) (1.5 * PADDING),
-						BUTTON_WIDTH,
-						BUTTON_HEIGHT),
-				"Delete Connection");
+			new Rectangle(
+				ClinicVisualizer.SCREEN_WIDTH - BUTTON_WIDTH - PADDING,
+				ClinicVisualizer.SCREEN_HEIGHT - (3 * BUTTON_HEIGHT) - (int) (2 * PADDING),
+				BUTTON_WIDTH,
+				BUTTON_HEIGHT
+			),
+			"Delete Connection"
+		);
 
 		this.addMouseListener(new PanelMouseListener());
 		this.addMouseMotionListener(new PanelMouseMotionListener());
@@ -135,6 +161,7 @@ public class VisualizerPanel extends JPanel {
 	}
 
 	private void drawNodes(Graphics g) {
+		Map<Integer, Set<Integer>> city = this.clinicPlacer.getCity();
 		Font font = new Font("Arial", Font.BOLD, 12);
 
 		g.setFont(font);
@@ -159,13 +186,25 @@ public class VisualizerPanel extends JPanel {
 
 			int fontCornerY = topCornerY + ((CLINIC_RADIUS * 2 - metrics.getHeight()) / 2) + metrics.getAscent();
 
-			g.setColor(Color.LIGHT_GRAY);
+			boolean isClinic = this.clinicPlacer.getClinicLocations().contains(nodeNumber);
+			boolean isCovered = this.clinicPlacer.computeCoveredLocations().contains(nodeNumber);
+
+			if (isClinic) {
+				g.setColor(CLINIC_COLOR);
+			} else {
+				g.setColor(CITY_COLOR);
+			}
+
 			g.fillOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
+
+			if (isCovered) {
+				g.setColor(COVERED_COLOR);
+				g.fillOval(x - CLINIC_RADIUS, y - CLINIC_RADIUS, CLINIC_RADIUS * 2, CLINIC_RADIUS * 2);
+			}
 
 			g.setColor(Color.BLACK);
 
 			if (selectedNode == nodeNumber) {
-
 				((Graphics2D) g).setStroke(new BasicStroke(4));
 
 				g.drawOval(x - CLINIC_RADIUS - 1, y - CLINIC_RADIUS - 1, CLINIC_RADIUS * 2 + 2, CLINIC_RADIUS * 2 + 2);
@@ -193,18 +232,18 @@ public class VisualizerPanel extends JPanel {
 				Point neighborPoint = this.locations.get(neighborNode);
 
 				boolean selectedPoint = (neighborNode == selectedNode) || (currentNode == selectedNode);
-				boolean selectedEdge = ((currentNode == this.selectedEdge1) && (neighborNode == this.selectedEdge2)) || ((neighborNode == this.selectedEdge1) && (currentNode == this.selectedEdge2));
+				boolean selectedEdge = ((currentNode == this.selectedEdge1) && (neighborNode == this.selectedEdge2))
+						|| ((neighborNode == this.selectedEdge1) && (currentNode == this.selectedEdge2));
 
 				if (selectedPoint || selectedEdge) {
 					g.setColor(SELECTED_EDGE_COLOR);
 				}
 
 				g.drawLine(
-					(int) currentPoint.getX(),
-					(int) currentPoint.getY(),
-					(int) neighborPoint.getX(),
-					(int) neighborPoint.getY()
-				);
+						(int) currentPoint.getX(),
+						(int) currentPoint.getY(),
+						(int) neighborPoint.getX(),
+						(int) neighborPoint.getY());
 
 				if (selectedPoint || selectedEdge) {
 					g.setColor(EDGE_COLOR);
@@ -218,21 +257,25 @@ public class VisualizerPanel extends JPanel {
 			Point anchorPoint = this.locations.get(anchorNode);
 
 			g.drawLine(
-				(int) anchorPoint.getX(),
-				(int) anchorPoint.getY(),
-				(int) currentDragPoint.getX(),
-				(int) currentDragPoint.getY()
-			);
+					(int) anchorPoint.getX(),
+					(int) anchorPoint.getY(),
+					(int) currentDragPoint.getX(),
+					(int) currentDragPoint.getY());
 
 			g.setColor(EDGE_COLOR);
 		}
 	}
 
 	private void drawOverlay(Graphics g) {
+		this.recomputeButton.draw(g);
 		this.addNodeButton.draw(g);
 
 		if (selectedNode != -1) {
 			this.deleteNodeButton.draw(g);
+		}
+
+		if ((selectedEdge1 != -1) && (selectedEdge2 != -1)) {
+			this.deleteEdgeButton.draw(g);
 		}
 	}
 
@@ -247,6 +290,17 @@ public class VisualizerPanel extends JPanel {
 			Point clickedPoint = e.getPoint();
 
 			// Buttons
+			if (recomputeButton.getBounds().contains(clickedPoint)) {
+				recomputeButton.setPressed(true);
+				repaint();
+
+				clinicPlacer.run();
+
+				recomputeButton.setPressed(false);
+				repaint();
+				return;
+			}
+
 			if (addNodeButton.getBounds().contains(clickedPoint)) {
 				addNodeButton.setPressed(true);
 				repaint();
@@ -277,12 +331,25 @@ public class VisualizerPanel extends JPanel {
 			if ((selectedNode != -1) && (deleteNodeButton.getBounds().contains(clickedPoint))) {
 				deleteNodeButton.setPressed(true);
 				repaint();
-				
+
 				clinicPlacer.deleteNode(selectedNode);
 				locations.remove(selectedNode);
 				selectedNode = -1;
-				
+
 				deleteNodeButton.setPressed(false);
+				repaint();
+				return;
+			}
+
+			if ((selectedEdge1 != -1) && ((selectedEdge2 != -1)) && (deleteEdgeButton.getBounds().contains(clickedPoint))) {
+				deleteEdgeButton.setPressed(true);
+				repaint();
+
+				clinicPlacer.deleteConnection(selectedEdge1, selectedEdge2);
+				selectedEdge1 = -1;
+				selectedEdge2 = -1;
+
+				deleteEdgeButton.setPressed(false);
 				repaint();
 				return;
 			}
@@ -386,7 +453,6 @@ public class VisualizerPanel extends JPanel {
 				}
 			}
 
-			
 			// Creating Connections
 			if (SwingUtilities.isRightMouseButton(e)) {
 				currentDragPoint = e.getPoint();
@@ -402,7 +468,7 @@ public class VisualizerPanel extends JPanel {
 						return;
 					}
 				}
-			
+
 			}
 
 			repaint();
