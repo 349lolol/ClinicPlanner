@@ -23,6 +23,7 @@ public class VisualizerPanel extends JPanel {
 
 	private static final Color EDGE_COLOR = new Color(0, 0, 255, 50);
 	private static final Color SELECTED_EDGE_COLOR = new Color(189, 0, 255, 50);
+	private static final int EDGE_THICKNESS = 5;
 
 	private static final int BUTTON_WIDTH = 100;
 	private static final int BUTTON_HEIGHT = 40;
@@ -37,6 +38,8 @@ public class VisualizerPanel extends JPanel {
 	private Point currentDragPoint;
 	private int anchorNode;
 	private int selectedNode;
+	private int selectedEdge1;
+	private int selectedEdge2;
 
 	private final Button addNodeButton;
 	private final Button deleteNodeButton;
@@ -50,7 +53,9 @@ public class VisualizerPanel extends JPanel {
 
 		// -1 for not selected
 		this.selectedNode = -1;
-		this.anchorNode = -1;
+		this.anchorNode = -1; 
+		this.selectedEdge1 = -1; 
+		this.selectedEdge2 = -1; 
 
 		this.placeNodes();
 
@@ -178,7 +183,7 @@ public class VisualizerPanel extends JPanel {
 		Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
 
 		g.setColor(EDGE_COLOR);
-		((Graphics2D) g).setStroke(new BasicStroke(5));
+		((Graphics2D) g).setStroke(new BasicStroke(EDGE_THICKNESS));
 
 		for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
 			int currentNode = entry.getKey();
@@ -187,9 +192,10 @@ public class VisualizerPanel extends JPanel {
 			for (int neighborNode : entry.getValue()) {
 				Point neighborPoint = this.locations.get(neighborNode);
 
-				boolean selectedEdge = (neighborNode == selectedNode) || (currentNode == selectedNode);
+				boolean selectedPoint = (neighborNode == selectedNode) || (currentNode == selectedNode);
+				boolean selectedEdge = ((currentNode == this.selectedEdge1) && (neighborNode == this.selectedEdge2)) || ((neighborNode == this.selectedEdge1) && (currentNode == this.selectedEdge2));
 
-				if (selectedEdge) {
+				if (selectedPoint || selectedEdge) {
 					g.setColor(SELECTED_EDGE_COLOR);
 				}
 
@@ -200,7 +206,7 @@ public class VisualizerPanel extends JPanel {
 					(int) neighborPoint.getY()
 				);
 
-				if (selectedEdge) {
+				if (selectedPoint || selectedEdge) {
 					g.setColor(EDGE_COLOR);
 				}
 			}
@@ -289,14 +295,37 @@ public class VisualizerPanel extends JPanel {
 
 					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
 						selectedNode = currentNode;
+						selectedEdge1 = -1;
+						selectedEdge2 = -1;
 
 						repaint();
 						return;
 					}
 				}
+
+				Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
+
+				for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
+					int currentNode = entry.getKey();
+					Point currentPoint = locations.get(currentNode);
+
+					for (int neighborNode : entry.getValue()) {
+						Point neighborPoint = locations.get(neighborNode);
+
+						if (Util.distanceToLine(neighborPoint, currentPoint, clickedPoint) <= EDGE_THICKNESS) {
+							selectedEdge1 = currentNode;
+							selectedEdge2 = neighborNode;
+							selectedNode = -1;
+							repaint();
+							return;
+						}
+					}
+				}
 			}
 
 			selectedNode = -1;
+			selectedEdge1 = -1;
+			selectedEdge2 = -1;
 			repaint();
 		}
 
