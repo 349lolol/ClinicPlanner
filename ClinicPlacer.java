@@ -39,10 +39,7 @@ public class ClinicPlacer {
         while (uncoveredNeighbors.size() > 0) {
             int newClinicId = findPriorityNode(uncoveredNeighbors);
 
-            if (!addClinic(newClinicId)) {
-				System.out.println(uncoveredNeighbors);
-                System.out.println("already have clinic " + newClinicId + " in system");
-            }
+            addClinic(newClinicId);
 
             uncoveredNeighbors = computeUncoveredLocations();
         }
@@ -52,7 +49,6 @@ public class ClinicPlacer {
         Set<Integer> coveredLocations = new HashSet<>();
         
         for (int location : this.clinicLocations) {
-			
             coveredLocations.add(location);
             coveredLocations.addAll(city.get(location));
         }
@@ -100,11 +96,14 @@ public class ClinicPlacer {
 
 			for (int neighbor : neighbors) {
 				if (uncoveredNeighbors.contains(neighbor)) {
-					System.out.println("Count: " + neighbor);
 					count++;
 				}
 			}
 			
+			if (uncoveredNeighbors.contains(node)) {
+				count++;
+			}
+
 			if (count > nodeWeight){
 				nodeWeight = count;
 				maxNode = node;
@@ -125,9 +124,6 @@ public class ClinicPlacer {
             this.city.get(node1).add(node2);
             this.city.get(node2).add(node1);
         }
-        else {
-            System.out.println("Uh oh - createConnection"); //TODO: remove it
-        }
     }
 
 	public void deleteNode(int node) {
@@ -139,6 +135,7 @@ public class ClinicPlacer {
 		}
 
 		this.city.remove(node);
+		clinicLocations.remove(node);
     }
 
     //removes one connection from neighbor list
@@ -146,8 +143,6 @@ public class ClinicPlacer {
         if ((this.city.containsKey(node1)) && (this.city.containsKey(node2))) {
             this.city.get(node1).remove(node2);
             this.city.get(node2).remove(node1);
-        } else {
-            System.out.println("Uh oh - deleteConnection"); //TODO: remove it
         }
     }
 

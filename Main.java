@@ -1,9 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,16 +35,27 @@ public class Main {
 
 		input.close();
 
-		Map<Integer, Set<Integer>> graph = new HashMap<>();
+		Map<Integer, Set<Integer>> city = new HashMap<>();
+		Set<Integer> clinics = new HashSet<>();
 
 		// Construct nodes first
 		for (String line : lines) {
 			String[] splitLine = line.split(":");
+			String currentNode = splitLine[0];
 
-			int node = Integer.parseInt(splitLine[0].trim());
+			int node;
 
-			if (!graph.containsKey(node)) {
-				graph.put(node, new HashSet<>());
+			if (currentNode.contains("C")) {
+				String nodeNumber = currentNode.split(" ")[0];
+				node = Integer.parseInt(nodeNumber.trim());
+				clinics.add(node);
+			} else {
+				node = Integer.parseInt(currentNode.trim());
+			}
+
+
+			if (!city.containsKey(node)) {
+				city.put(node, new HashSet<>());
 			}
 
 			if (splitLine.length != 2) {
@@ -58,14 +67,17 @@ public class Main {
 			for (String neighborAsString : neighbors) {
 				int neighbor = Integer.parseInt(neighborAsString.trim());
 
-				graph.get(node).add(neighbor);
+				city.get(node).add(neighbor);
 
-				if (!graph.containsKey(neighbor)) {
-					graph.put(neighbor, new HashSet<>());
+				if (!city.containsKey(neighbor)) {
+					city.put(neighbor, new HashSet<>());
 				}
 			}
 		}
+		
+		ClinicPlacer clinicPlacer = new ClinicPlacer(city, clinics);
+		ClinicVisualizer clinicVisualizer = new ClinicVisualizer(clinicPlacer);
 
-		System.out.println(graph);
+		clinicVisualizer.run();
     }
 }
