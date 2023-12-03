@@ -17,10 +17,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/** 
+ * Visualizes the city and clinics on a {@see JPanel}
+ * @author Harry Xu & Patrick Wei
+ * @version 1.0 - November 29th 2023
+ */
 public class VisualizerPanel extends JPanel {
 	private static final int PADDING = 20;
 	private static final int CLINIC_RADIUS = 15;
 
+	private static final Font CITY_FONT = new Font("Arial", Font.BOLD, 12);
 	private static final Color CITY_COLOR = Color.LIGHT_GRAY;
 	private static final Color CLINIC_COLOR = Color.GREEN;
 	private static final Color COVERED_COLOR = new Color(
@@ -67,6 +73,7 @@ public class VisualizerPanel extends JPanel {
 		this.selectedEdge1 = -1;
 		this.selectedEdge2 = -1;
 
+		// Places nodes onto the panel
 		this.placeNodes();
 
 		// Add UI elements
@@ -110,6 +117,7 @@ public class VisualizerPanel extends JPanel {
 			"Delete Connection"
 		);
 
+		// Event listeners
 		this.addMouseListener(new PanelMouseListener());
 		this.addMouseMotionListener(new PanelMouseMotionListener());
 	}
@@ -127,7 +135,7 @@ public class VisualizerPanel extends JPanel {
 		int x = 0;
 		int y = 0;
 
-		// Generate coordinates
+		// Generate coordinates randomly
 		while (!isValid) {
 			x = (int) (Math.random() * CONTENT_WIDTH) + BORDER_OFFSET;
 			y = (int) (Math.random() * CONTENT_HEIGHT) + BORDER_OFFSET;
@@ -161,13 +169,11 @@ public class VisualizerPanel extends JPanel {
 	}
 
 	private void drawNodes(Graphics g) {
-		Font font = new Font("Arial", Font.BOLD, 12);
-
-		g.setFont(font);
+		g.setFont(CITY_FONT);
 		((Graphics2D) g).setStroke(new BasicStroke(2));
 
-		// Get the FontMetrics
-		FontMetrics metrics = g.getFontMetrics(font);
+		// Get the FontMetrics to center text
+		FontMetrics metrics = g.getFontMetrics(CITY_FONT);
 
 		for (Map.Entry<Integer, Point> entry : this.locations.entrySet()) {
 			int nodeNumber = entry.getKey();
@@ -188,6 +194,7 @@ public class VisualizerPanel extends JPanel {
 			boolean isClinic = this.clinicPlacer.getClinicLocations().contains(nodeNumber);
 			boolean isCovered = this.clinicPlacer.computeCoveredLocations().contains(nodeNumber);
 
+			// Uses different color for clinics
 			if (isClinic) {
 				g.setColor(CLINIC_COLOR);
 			} else {
@@ -202,8 +209,10 @@ public class VisualizerPanel extends JPanel {
 			}
 
 			g.setColor(Color.BLACK);
-
+			
+			// Border
 			if (selectedNode == nodeNumber) {
+				// Thickens border for selected node
 				((Graphics2D) g).setStroke(new BasicStroke(4));
 
 				g.drawOval(x - CLINIC_RADIUS - 1, y - CLINIC_RADIUS - 1, CLINIC_RADIUS * 2 + 2, CLINIC_RADIUS * 2 + 2);
@@ -356,6 +365,7 @@ public class VisualizerPanel extends JPanel {
 
 			// Selecting entities
 			if (SwingUtilities.isLeftMouseButton(e)) {
+				// Selecting nodes
 				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
 					int currentNode = entry.getKey();
 					Point currentPoint = entry.getValue();
@@ -370,6 +380,7 @@ public class VisualizerPanel extends JPanel {
 					}
 				}
 
+				// Selecting edges
 				Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
 
 				for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
@@ -400,6 +411,7 @@ public class VisualizerPanel extends JPanel {
 		public void mouseReleased(MouseEvent e) {
 			Point clickedPoint = e.getPoint();
 
+			// Creating connections
 			if (anchorNode != -1) {
 				for (Map.Entry<Integer, Point> entry : locations.entrySet()) {
 					int currentNode = entry.getKey();

@@ -6,6 +6,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+/** 
+ * Represents a button on the GUI
+ * @author Harry Xu
+ * @version 1.0 - November 29th 2023
+ */
 public class Button {
 	private static final Color BOX_SHADOW = new Color(0, 0, 0, 128);
 	private static final int CORNER_ROUNDING = 10;
@@ -43,6 +48,7 @@ public class Button {
 			CORNER_ROUNDING
 		);
 
+		// Offset to give depth to button
 		int offset = 0;
 
 		if (this.isPressed) {

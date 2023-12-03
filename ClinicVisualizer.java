@@ -3,7 +3,11 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
-
+/** 
+ * Visualizes the city and the clinics on a GUI
+ * @author Harry Xu
+ * @version 1.0 - November 28th 2023
+ */
 public class ClinicVisualizer {
 	public static final int SCREEN_WIDTH = 800;
 	public static final int SCREEN_HEIGHT = 600;

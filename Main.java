@@ -2,30 +2,26 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-		// Get all lines
+		// Read from file
 		List<String> lines = new ArrayList<>();
 
 		BufferedReader input = new BufferedReader(new FileReader("input.txt"));
 
 		String currentLine = input.readLine();
-
+		
 		while (currentLine != null) {
 			lines.add(currentLine);
 			currentLine = input.readLine();
 		}
-
+		
 		input.close();
-
-		Map<Integer, Set<Integer>> city = new HashMap<>();
-		Set<Integer> clinics = new HashSet<>();
+		
+		// Process file
+		ClinicPlacer clinicPlacer = new ClinicPlacer();
 
 		for (String line : lines) {
 			// Construct nodes
@@ -38,14 +34,14 @@ public class Main {
 			if (currentNode.contains("C")) {
 				String nodeNumber = currentNode.split(" ")[0];
 				node = Integer.parseInt(nodeNumber.trim());
-				clinics.add(node);
+				clinicPlacer.addClinic(node);
 			} else {
 				node = Integer.parseInt(currentNode.trim());
 			}
 
 
-			if (!city.containsKey(node)) {
-				city.put(node, new HashSet<>());
+			if (!clinicPlacer.containsCity(node)) {
+				clinicPlacer.addCity(node);
 			}
 
 			if (splitLine.length != 2) {
@@ -58,15 +54,16 @@ public class Main {
 			for (String neighborAsString : neighbors) {
 				int neighbor = Integer.parseInt(neighborAsString.trim());
 
-				city.get(node).add(neighbor);
-
-				if (!city.containsKey(neighbor)) {
-					city.put(neighbor, new HashSet<>());
+				if (!clinicPlacer.containsCity(neighbor)) {
+					clinicPlacer.addCity(neighbor);
 				}
+
+				clinicPlacer.createConnection(node, neighbor);
+
 			}
 		}
 		
-		ClinicPlacer clinicPlacer = new ClinicPlacer(city, clinics);
+		// Visualize graph
 		ClinicVisualizer clinicVisualizer = new ClinicVisualizer(clinicPlacer);
 
 		clinicVisualizer.run();
