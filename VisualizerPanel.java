@@ -161,7 +161,6 @@ public class VisualizerPanel extends JPanel {
 	}
 
 	private void drawNodes(Graphics g) {
-		Map<Integer, Set<Integer>> city = this.clinicPlacer.getCity();
 		Font font = new Font("Arial", Font.BOLD, 12);
 
 		g.setFont(font);
@@ -221,6 +220,7 @@ public class VisualizerPanel extends JPanel {
 	private void drawEdges(Graphics g) {
 		Map<Integer, Set<Integer>> city = clinicPlacer.getCity();
 
+		// Set edge color
 		g.setColor(EDGE_COLOR);
 		((Graphics2D) g).setStroke(new BasicStroke(EDGE_THICKNESS));
 
@@ -251,16 +251,18 @@ public class VisualizerPanel extends JPanel {
 			}
 		}
 
+		// Draw dragged edge
 		if ((anchorNode != -1) && (currentDragPoint != null)) {
 			g.setColor(SELECTED_EDGE_COLOR);
 
 			Point anchorPoint = this.locations.get(anchorNode);
 
 			g.drawLine(
-					(int) anchorPoint.getX(),
-					(int) anchorPoint.getY(),
-					(int) currentDragPoint.getX(),
-					(int) currentDragPoint.getY());
+				(int) anchorPoint.getX(),
+				(int) anchorPoint.getY(),
+				(int) currentDragPoint.getX(),
+				(int) currentDragPoint.getY()
+			);
 
 			g.setColor(EDGE_COLOR);
 		}
@@ -281,9 +283,7 @@ public class VisualizerPanel extends JPanel {
 
 	private class PanelMouseListener implements MouseListener {
 		@Override
-		public void mouseClicked(MouseEvent e) {
-
-		}
+		public void mouseClicked(MouseEvent e) { }
 
 		@Override
 		public void mousePressed(MouseEvent e) {
@@ -417,15 +417,10 @@ public class VisualizerPanel extends JPanel {
 		}
 
 		@Override
-		public void mouseEntered(MouseEvent e) {
-
-		}
+		public void mouseEntered(MouseEvent e) { }
 
 		@Override
-		public void mouseExited(MouseEvent e) {
-
-		}
-
+		public void mouseExited(MouseEvent e) { }
 	}
 
 	private class PanelMouseMotionListener implements MouseMotionListener {
@@ -475,9 +470,6 @@ public class VisualizerPanel extends JPanel {
 		}
 
 		@Override
-		public void mouseMoved(MouseEvent e) {
-
-		}
-
+		public void mouseMoved(MouseEvent e) { }
 	}
 }

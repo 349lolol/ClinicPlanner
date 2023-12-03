@@ -10,17 +10,6 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        
-        /*
-         * Read in each node, add it to map - later
-         * read again to find neighbours - later
-         * 
-         * adjacency list - done
-         * set of covered
-         * set of locations
-         * map of nodes to their count
-        */
-
 		// Get all lines
 		List<String> lines = new ArrayList<>();
 
@@ -38,13 +27,14 @@ public class Main {
 		Map<Integer, Set<Integer>> city = new HashMap<>();
 		Set<Integer> clinics = new HashSet<>();
 
-		// Construct nodes first
 		for (String line : lines) {
+			// Construct nodes
 			String[] splitLine = line.split(":");
 			String currentNode = splitLine[0];
 
 			int node;
 
+			// Mark as clinics 
 			if (currentNode.contains("C")) {
 				String nodeNumber = currentNode.split(" ")[0];
 				node = Integer.parseInt(nodeNumber.trim());
@@ -64,6 +54,7 @@ public class Main {
 
 			String[] neighbors = splitLine[1].trim().split(",");
 
+			// Construct Edges
 			for (String neighborAsString : neighbors) {
 				int neighbor = Integer.parseInt(neighborAsString.trim());
 

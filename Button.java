@@ -26,7 +26,7 @@ public class Button {
 
 		((Graphics2D) g).setStroke(new BasicStroke(2));
 
-		// Get the FontMetrics
+		// Get the FontMetrics to center text
 		FontMetrics metrics = g.getFontMetrics(font);
 
 		int fontCornerX = (int) this.bounds.getCenterX() - (metrics.stringWidth(this.text) / 2);
