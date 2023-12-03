@@ -317,22 +317,34 @@ public class VisualizerPanel extends JPanel {
 				int value;
 
 				try {
+					String rawValue = JOptionPane.showInputDialog("Input city number: ");
+
+					if (rawValue == null) {
+						addNodeButton.setPressed(false);
+						repaint();
+						return;
+					}
+
 					value = Integer.parseInt(JOptionPane.showInputDialog("Input city number: "));
 				} catch (NumberFormatException exception) {
 					JOptionPane.showMessageDialog(null, "Not a positive integer.");
+					addNodeButton.setPressed(false);
+					repaint();
 					return;
 				}
 
 				if (clinicPlacer.getCity().containsKey(value)) {
 					JOptionPane.showMessageDialog(null, "City already exists");
+					addNodeButton.setPressed(false);
+					repaint();
 					return;
 				}
 
 				clinicPlacer.addCity(value);
 				locations.put(value, generatePoint());
 
-				repaint();
 				addNodeButton.setPressed(false);
+				repaint();
 
 				return;
 			}
