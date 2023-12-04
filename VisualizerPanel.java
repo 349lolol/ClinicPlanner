@@ -325,7 +325,7 @@ public class VisualizerPanel extends JPanel {
 						return;
 					}
 
-					value = Integer.parseInt(JOptionPane.showInputDialog("Input city number: "));
+					value = Integer.parseInt(rawValue);
 				} catch (NumberFormatException exception) {
 					JOptionPane.showMessageDialog(null, "Not a positive integer.");
 					addNodeButton.setPressed(false);
