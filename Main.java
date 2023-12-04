@@ -68,7 +68,7 @@ public class Main {
 		}
 		
 		// Visualize graph
-		ClinicVisualizer clinicVisualizer = new ClinicVisualizer(clinicPlacer);
+		ClinicVisualizer clinicVisualizer = new ClinicVisualizer(clinicPlacer, filename);
 
 		clinicVisualizer.run();
     }
