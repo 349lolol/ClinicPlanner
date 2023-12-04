@@ -304,9 +304,6 @@ public class VisualizerPanel extends JPanel {
 				repaint();
 
 				clinicPlacer.run();
-
-				recomputeButton.setPressed(false);
-				repaint();
 				return;
 			}
 
@@ -422,6 +419,12 @@ public class VisualizerPanel extends JPanel {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			Point clickedPoint = e.getPoint();
+
+			if (recomputeButton.getBounds().contains(clickedPoint)) {
+				recomputeButton.setPressed(false);
+				repaint();
+				return;
+			}
 
 			// Creating connections
 			if (anchorNode != -1) {
