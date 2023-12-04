@@ -3,13 +3,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.JOptionPane;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-		// Read from file
-		List<String> lines = new ArrayList<>();
+		String filename = JOptionPane.showInputDialog("Enter input file (with extension): ");
 
-		BufferedReader input = new BufferedReader(new FileReader("input.txt"));
+		// Read from file
+		BufferedReader input = new BufferedReader(new FileReader(filename));
+
+		List<String> lines = new ArrayList<>();
 
 		String currentLine = input.readLine();
 		
@@ -50,7 +55,7 @@ public class Main {
 
 			String[] neighbors = splitLine[1].trim().split(",");
 
-			// Construct Edges
+			// Construct edges
 			for (String neighborAsString : neighbors) {
 				int neighbor = Integer.parseInt(neighborAsString.trim());
 
