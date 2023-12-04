@@ -140,4 +140,37 @@ public class ClinicPlacer {
 	public boolean containsCity(int city){
         return this.city.keySet().contains(city);
     }
+
+	@Override
+	public String toString() {
+		String str = "";
+
+		Map<Integer, Set<Integer>> city = this.getCity();
+		Set<Integer> clinics = this.getClinicLocations();
+
+		for (Map.Entry<Integer, Set<Integer>> entry : city.entrySet()) {
+			int location = entry.getKey();
+			Set<Integer> neighbors = entry.getValue();
+			String line = Integer.toString(location);
+
+			if (clinics.contains(location)) {
+				line += " C";
+			}
+
+			line += ":";
+
+			for (int neighbor : neighbors) {
+				line += (neighbor + ",");
+			}
+
+			// Removing trailing comma
+			if (neighbors.size() != 0) {
+				line = line.substring(0, line.length() - 1);
+			}
+
+			str += (line + "\n");
+		}
+
+		return str;
+	}
 }
