@@ -25,6 +25,7 @@ public class ClinicPlacer {
         return city;
     }
 
+    //used to calculate all neighbors that are to become a clinic
 	public void run() {
 		// Every lone node becomes a clinic
         for (Map.Entry<Integer, Set<Integer>> entry : this.city.entrySet()) {
@@ -45,6 +46,7 @@ public class ClinicPlacer {
         }
 	}
     
+    //finds all neighbors that are covered by a clinic
     public Set<Integer> computeCoveredLocations() {
         Set<Integer> coveredLocations = new HashSet<>();
         
@@ -56,6 +58,7 @@ public class ClinicPlacer {
         return coveredLocations;
     }
 
+    //finds all neighbors uncovered, all neighbors minus covered neighbors
     public Set<Integer> computeUncoveredLocations(){
         Set<Integer> uncoveredNeighbors = this.city.keySet();
 		Set<Integer> uncoveredNeighborsCopy = new HashSet<>(uncoveredNeighbors);
@@ -65,6 +68,7 @@ public class ClinicPlacer {
         return uncoveredNeighborsCopy;
     }
 
+    //finds the node that has the most uncovered neighbors
     public int findPriorityNode(Set<Integer> uncoveredNeighbors){
         int maxNode = -1;
         int nodeWeight = -1;
@@ -97,6 +101,7 @@ public class ClinicPlacer {
         return clinicLocations.add(newClinicId);
     }
 
+    //links two neighbors
     public void createConnection(int node1, int node2) {
         if ((this.city.containsKey(node1)) && (this.city.containsKey(node2))) {
             this.city.get(node1).add(node2);
@@ -116,6 +121,7 @@ public class ClinicPlacer {
 		clinicLocations.remove(node);
     }
 
+    //deletes a connection between two neighbors
     public void deleteConnection(int node1, int node2) {
         if ((this.city.containsKey(node1)) && (this.city.containsKey(node2))) {
             this.city.get(node1).remove(node2);
