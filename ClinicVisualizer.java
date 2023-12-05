@@ -43,7 +43,6 @@ public class ClinicVisualizer {
 		this.frame.setVisible(true);
 	}
 
-	
 	private class GUIWindowListener implements WindowListener {
 		@Override
 		public void windowOpened(WindowEvent e) { }

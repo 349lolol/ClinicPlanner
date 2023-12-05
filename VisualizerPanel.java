@@ -249,10 +249,11 @@ public class VisualizerPanel extends JPanel {
 				}
 
 				g.drawLine(
-						(int) currentPoint.getX(),
-						(int) currentPoint.getY(),
-						(int) neighborPoint.getX(),
-						(int) neighborPoint.getY());
+					(int) currentPoint.getX(),
+					(int) currentPoint.getY(),
+					(int) neighborPoint.getX(),
+					(int) neighborPoint.getY()
+				);
 
 				if (selectedPoint || selectedEdge) {
 					g.setColor(EDGE_COLOR);
@@ -383,7 +384,6 @@ public class VisualizerPanel extends JPanel {
 						selectedNode = currentNode;
 						selectedEdge1 = -1;
 						selectedEdge2 = -1;
-
 						repaint();
 						return;
 					}
@@ -464,7 +464,6 @@ public class VisualizerPanel extends JPanel {
 
 					if (Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) {
 						selectedNode = currentNode;
-
 						repaint();
 						return;
 					}
@@ -485,12 +484,10 @@ public class VisualizerPanel extends JPanel {
 
 					if ((Util.distance(clickedPoint, currentPoint) <= CLINIC_RADIUS) && (anchorNode == -1)) {
 						anchorNode = currentNode;
-
 						repaint();
 						return;
 					}
 				}
-
 			}
 
 			repaint();

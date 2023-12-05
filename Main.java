@@ -43,7 +43,6 @@ public class Main {
 				node = Integer.parseInt(currentNode.trim());
 			}
 
-
 			if (!clinicPlacer.containsCity(node)) {
 				clinicPlacer.addCity(node);
 			}
@@ -63,13 +62,11 @@ public class Main {
 				}
 
 				clinicPlacer.createConnection(node, neighbor);
-
 			}
 		}
 		
 		// Visualize graph
 		ClinicVisualizer clinicVisualizer = new ClinicVisualizer(clinicPlacer, filename);
-
 		clinicVisualizer.run();
     }
 }
