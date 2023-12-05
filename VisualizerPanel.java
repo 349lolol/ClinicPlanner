@@ -169,6 +169,8 @@ public class VisualizerPanel extends JPanel {
 	}
 
 	private void drawNodes(Graphics g) {
+		Map<Integer, Integer> weights = this.clinicPlacer.getWeights();
+
 		g.setFont(CITY_FONT);
 		((Graphics2D) g).setStroke(new BasicStroke(2));
 
@@ -177,6 +179,7 @@ public class VisualizerPanel extends JPanel {
 
 		for (Map.Entry<Integer, Point> entry : this.locations.entrySet()) {
 			int nodeNumber = entry.getKey();
+			String weight = Integer.toString(weights.get(nodeNumber));
 			String nodeString = Integer.toString(nodeNumber);
 			Point point = entry.getValue();
 
@@ -186,10 +189,16 @@ public class VisualizerPanel extends JPanel {
 			int topCornerX = x - CLINIC_RADIUS;
 			int topCornerY = y - CLINIC_RADIUS;
 
-			// Determine the X coordinate for the text
-			int fontCornerX = topCornerX + (CLINIC_RADIUS * 2 - metrics.stringWidth(nodeString)) / 2;
+			int bottomCornerX = x + CLINIC_RADIUS;
+			int bottomCornerY = y + CLINIC_RADIUS;
 
+			// Determine the coordinates for the text
+			int fontCornerX = topCornerX + (CLINIC_RADIUS * 2 - metrics.stringWidth(nodeString)) / 2;
 			int fontCornerY = topCornerY + ((CLINIC_RADIUS * 2 - metrics.getHeight()) / 2) + metrics.getAscent();
+
+			// Determine coordinates for weight text
+			int weightFontCornerX = bottomCornerX + 2;
+			int weightFontCornerY = bottomCornerY + 2;
 
 			boolean isClinic = this.clinicPlacer.getClinicLocations().contains(nodeNumber);
 			boolean isCovered = this.clinicPlacer.computeCoveredLocations().contains(nodeNumber);
@@ -223,6 +232,7 @@ public class VisualizerPanel extends JPanel {
 			}
 
 			g.drawString(nodeString, fontCornerX, fontCornerY);
+			g.drawString(weight, weightFontCornerX, weightFontCornerY);
 		}
 	}
 

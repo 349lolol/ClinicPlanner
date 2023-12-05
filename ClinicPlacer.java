@@ -17,11 +17,11 @@ public class ClinicPlacer {
         this.clinicLocations = new HashSet<>();
     }
 
-    public Set<Integer> getClinicLocations(){
+    public Set<Integer> getClinicLocations() {
         return clinicLocations;
     }
 
-    public Map<Integer, Set<Integer>> getCity(){
+    public Map<Integer, Set<Integer>> getCity() {
         return city;
     }
 
@@ -76,20 +76,20 @@ public class ClinicPlacer {
         for (int node : this.city.keySet()) {
             Set<Integer> neighbors = this.city.get(node);
 
-			int count = 0;
+			int weight = 0;
 
 			for (int neighbor : neighbors) {
 				if (uncoveredNeighbors.contains(neighbor)) {
-					count++;
+					weight++;
 				}
 			}
 			
 			if (uncoveredNeighbors.contains(node)) {
-				count++;
+				weight++;
 			}
 
-			if (count > nodeWeight){
-				nodeWeight = count;
+			if (weight > nodeWeight){
+				nodeWeight = weight;
 				maxNode = node;
             }
         }
@@ -140,6 +140,31 @@ public class ClinicPlacer {
 	public boolean containsCity(int city){
         return this.city.keySet().contains(city);
     }
+
+	public Map<Integer, Integer> getWeights() {
+		Set<Integer> uncoveredNeighbors = computeUncoveredLocations();
+		Map<Integer, Integer> weights = new HashMap<>();
+
+		for (int node : this.city.keySet()) {
+			Set<Integer> neighbors = this.city.get(node);
+
+			int weight = 0;
+
+			for (int neighbor : neighbors) {
+				if (uncoveredNeighbors.contains(neighbor)) {
+					weight++;
+				}
+			}
+			
+			if (uncoveredNeighbors.contains(node)) {
+				weight++;
+			}
+
+			weights.put(node, weight);
+        }
+
+		return weights;
+	}
 
 	@Override
 	public String toString() {
